@@ -1,3 +1,4 @@
+import torch
 import wandb
 
 from arguments import TrainingArguments
@@ -15,10 +16,12 @@ from transformers import (
 def main():
     model_name = "klue/bert-base"
     data_path = "./dataset/train.csv"
+    device = torch.device("cuda") if torch.cuda.is_avaliable() else torch.device("cpu")
     parser = HfArgumentParser(TrainingArguments)
     training_args = parser.parse_args_into_dataclasses()
 
     print(f"Current Model is {model_name}")
+    print(f"Current device is {device}")
 
     set_seed(training_args.seed)
 
@@ -29,7 +32,7 @@ def main():
         model_name, config=model_config
     )
     model.resize_token_embeddings(len(tokenizer))
-    model.to("cuda:0")
+    model.to(device)
 
     wandb.init(
         entity="psrpsj",
