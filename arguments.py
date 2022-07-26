@@ -25,4 +25,4 @@ class TrainingArguments(TrainingArguments):
     overwrite_output_dir: bool = field(default=True)
     save_total_limit: int = field(default=5)
     load_best_model_at_end: bool = field(default=True)
-    metric_for_best_model: str = field(default="loss")
+    metric_for_best_model: str = field(default="accuracy")

@@ -1,3 +1,5 @@
+import wandb
+
 from arguments import TrainingArguments
 
 from transformers import (
@@ -26,4 +28,12 @@ def main():
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name, config=model_config
     )
-    model.train()
+    model.resize_token_embeddings(len(tokenizer))
+    model.to("cuda:0")
+
+    wandb.init(
+        entity="psrpsj",
+        project="shoppingmall",
+        name=model_name,
+        tags=model_name,
+    )
