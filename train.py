@@ -28,7 +28,7 @@ def compute_metrics(pred):
 def main():
     model_name = "klue/bert-base"
     data_path = "./dataset/train.csv"
-    device = torch.device("cuda") if torch.cuda.is_avaliable() else torch.device("cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     parser = HfArgumentParser(TrainingArguments)
     training_args = parser.parse_args_into_dataclasses()
 
