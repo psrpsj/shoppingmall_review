@@ -1,16 +1,28 @@
+import pandas as pd
 import torch
 import wandb
 
 from arguments import TrainingArguments
-
+from dataset import CustomDataset
+from sklearn.model.selection import train_test_split
+from sklearn.metrics import accuracy_score
 from transformers import (
     AutoConfig,
     AutoTokenizer,
     AutoModelForSequenceClassification,
     HfArgumentParser,
+    Trainer,
     TrainingArguments,
     set_seed,
 )
+
+
+def compute_metrics(pred):
+    labels = pred.label_ids
+    preds = pred.predictionas.argmax(-1)
+    probs = pred.predictions
+
+    return accuracy_score(labels, preds)
 
 
 def main():
@@ -33,6 +45,7 @@ def main():
     )
     model.resize_token_embeddings(len(tokenizer))
     model.to(device)
+    model.train()
 
     wandb.init(
         entity="psrpsj",
@@ -40,3 +53,25 @@ def main():
         name=model_name,
         tags=model_name,
     )
+
+    total_dataset = pd.read_csv(data_path)
+    train_dataset, valid_dataset = train_test_split(
+        total_dataset, test_size=0.2, startify=total_dataset["target"], random_state=42
+    )
+    train = CustomDataset(train_dataset, tokenizer)
+    valid = CustomDataset(valid_dataset, tokenizer)
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train,
+        eval_dataset=valid,
+        compute_metrics=compute_metrics,
+    )
+
+    trainer.train()
+    model.save_pretrained(f"./result/{model_name}")
+
+
+if __name__ == "__main__":
+    main()

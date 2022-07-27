@@ -1,10 +1,25 @@
-import pandas as pd
+from torch.utils.data import Dataset
+import torch
 
-from datasets import load_dataset
 
+class CustomDataset(Dataset):
+    def __init__(self, dataset, tokenizer):
+        self.dataset = dataset
+        self.tokenizer = tokenizer
+        self.tokenized_sentence = self.tokenizer(
+            dataset["reviews"].tolist(),
+            return_tensors="pt",
+            padding="max_length",
+            truncation=True,
+        )
 
-def create_token_data(path):
-    dataset = pd.read_csv(path)
-    review = ["[CLS] " + str(r) + " [SEP]" for r in dataset["reviews"]]
-    dataset["reviews"] = review
-    dataset.to_csv("./dataset/train_w_token.csv")
+    def __getitem__(self, idx):
+        encoded = {
+            key: val[idx].clone().detach()
+            for key, val in self.tokenized_sentence.items()
+        }
+        encoded["label"] = torch.tensor(self.dataset["target"][idx])
+        return encoded
+
+    def __len__(self):
+        return len(self.dataset)
