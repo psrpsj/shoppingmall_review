@@ -4,7 +4,7 @@ import wandb
 
 from arguments import TrainingArguments
 from dataset import CustomDataset
-from sklearn.model.selection import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from transformers import (
     AutoConfig,

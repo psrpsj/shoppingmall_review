@@ -3,18 +3,6 @@ from transformers import TrainingArguments
 
 
 @dataclass
-class ModelArguments:
-    """
-    Arguments containing information related to model
-    """
-
-    model_name: str = field(
-        default="klue/bert-base",
-        metadata={"help: model name to train from huggingface"},
-    )
-
-
-@dataclass
 class TrainingArguments(TrainingArguments):
     output_dir: str = field(default="./output")
     num_train_epochs: int = field(
