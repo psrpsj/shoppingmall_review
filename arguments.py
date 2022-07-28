@@ -4,7 +4,7 @@ from transformers import TrainingArguments
 
 @dataclass
 class TrainingArguments(TrainingArguments):
-    output_dir: str = field(default="./output")
+    output_dir: str = field(default="./output/")
     num_train_epochs: int = field(
         default=10, metadata={"help": "number of epoch to run"}
     )

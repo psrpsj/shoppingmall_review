@@ -70,7 +70,7 @@ def main():
     )
 
     trainer.train()
-    model.save_pretrained(f"./result/{model_name}")
+    model.save_pretrained(training_args.output_dir + model_name)
 
 
 if __name__ == "__main__":
