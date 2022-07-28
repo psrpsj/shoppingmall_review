@@ -1,6 +1,7 @@
 import pandas as pd
 import torch
 import wandb
+import os
 
 from arguments import TrainingArguments
 from dataset import CustomDataset
@@ -12,17 +13,17 @@ from transformers import (
     AutoModelForSequenceClassification,
     HfArgumentParser,
     Trainer,
-    TrainingArguments,
     set_seed,
 )
 
 
 def compute_metrics(pred):
     labels = pred.label_ids
-    preds = pred.predictionas.argmax(-1)
+    preds = pred.predictions.argmax(-1)
     probs = pred.predictions
 
-    return accuracy_score(labels, preds)
+    acc = accuracy_score(labels, preds)
+    return {"accuracy" : acc}
 
 
 def main():
@@ -30,7 +31,7 @@ def main():
     data_path = "./dataset/train.csv"
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     parser = HfArgumentParser(TrainingArguments)
-    training_args = parser.parse_args_into_dataclasses()
+    (training_args,) = parser.parse_args_into_dataclasses()
 
     print(f"Current Model is {model_name}")
     print(f"Current device is {device}")
@@ -39,7 +40,7 @@ def main():
 
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
     model_config = AutoConfig.from_pretrained(pretrained_model_name_or_path=model_name)
-    model_config.num_labels = 4
+    model_config.num_labels = 6
     model = AutoModelForSequenceClassification.from_pretrained(
         model_name, config=model_config
     )
@@ -47,6 +48,7 @@ def main():
     model.to(device)
     model.train()
 
+    print(training_args.device)
     wandb.init(
         entity="psrpsj",
         project="shoppingmall",
@@ -56,7 +58,7 @@ def main():
 
     total_dataset = pd.read_csv(data_path)
     train_dataset, valid_dataset = train_test_split(
-        total_dataset, test_size=0.2, startify=total_dataset["target"], random_state=42
+        total_dataset, test_size=0.2, stratify=total_dataset["target"], random_state=42
     )
     train = CustomDataset(train_dataset, tokenizer)
     valid = CustomDataset(valid_dataset, tokenizer)

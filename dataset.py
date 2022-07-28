@@ -5,12 +5,13 @@ import torch
 class CustomDataset(Dataset):
     def __init__(self, dataset, tokenizer):
         self.dataset = dataset
-        self.tokenizer = tokenizer
-        self.tokenized_sentence = self.tokenizer(
+        self.label = dataset["target"]
+        self.tokenized_sentence = tokenizer(
             dataset["reviews"].tolist(),
             return_tensors="pt",
-            padding="max_length",
+            padding=True,
             truncation=True,
+            max_length = 256,
         )
 
     def __getitem__(self, idx):
@@ -18,7 +19,7 @@ class CustomDataset(Dataset):
             key: val[idx].clone().detach()
             for key, val in self.tokenized_sentence.items()
         }
-        encoded["label"] = torch.tensor(self.dataset["target"][idx])
+        encoded["label"] = torch.tensor(self.label.iloc[idx])
         return encoded
 
     def __len__(self):
