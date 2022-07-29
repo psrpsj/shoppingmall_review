@@ -1,7 +1,7 @@
+import argparse
 import pandas as pd
 import torch
 import wandb
-import os
 
 from arguments import TrainingArguments
 from dataset import CustomDataset
@@ -26,9 +26,9 @@ def compute_metrics(pred):
     return {"accuracy": acc}
 
 
-def main():
-    model_name = "klue/bert-base"
-    data_path = "./dataset/train.csv"
+def main(args):
+    model_name = args.model_name
+    data_path = args.data_path
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     parser = HfArgumentParser(TrainingArguments)
     (training_args,) = parser.parse_args_into_dataclasses()
@@ -52,9 +52,11 @@ def main():
     wandb.init(
         entity="psrpsj",
         project="shoppingmall",
-        name=model_name,
+        name=args.project_name,
         tags=model_name,
     )
+
+    wandb.config.update(training_args)
 
     total_dataset = pd.read_csv(data_path)
     train_dataset, valid_dataset = train_test_split(
@@ -71,9 +73,17 @@ def main():
         compute_metrics=compute_metrics,
     )
 
+    print("---- START TRAINING ----")
     trainer.train()
-    model.save_pretrained(training_args.output_dir + model_name)
+    model.save_pretrained(training_args.output_dir + args.project_name)
+    print("---- FINISH ----")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model_name', type=str, default="klue/bert-base")
+    parser.add_argument('--project_name', type=str, default='baseline')
+    parser.add_argument('--data_path', type=str, default='./dataset/train.csv')
+    
+    args = parser.parse_args()
+    main(args)

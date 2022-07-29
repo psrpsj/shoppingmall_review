@@ -1,20 +1,23 @@
+import argparse
 import numpy as np
+import os
 import pandas as pd
 import torch
 import torch.nn.functional as F
 
 from dataset import CustomDataset
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, DataLoader
+from torch.utils.data import DataLoader
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
-def main():
-    model_path = "./output/klue/bert-base"
-    data_path = "./dataset/test.csv"
+def main(args):
+    model_path = os.path.join("./output/", args.project_name)
+    data_path = args.data_path
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    model = AutoModelForSequenceClassification(model_path)
-    model.resize_token_embedding(len(tokenizer))
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model)
+    model = AutoModelForSequenceClassification.from_pretrained(model_path)
+    model.resize_token_embeddings(len(tokenizer))
     model.to(device)
     model.eval()
 
@@ -26,6 +29,8 @@ def main():
 
     output_prob = []
     output_pred = []
+
+    print("---- START INFERENCE ----")
     for data in tqdm(dataloader):
         output = model(
             input_ids=data["input_ids"].to(device),
@@ -42,10 +47,16 @@ def main():
 
     pred_answer = np.concatenate(output_pred).tolist()
     output_prob = np.concatenate(output_prob, axis=0).tolist()
-    output = np.DataFrame({"id": test_id, "target": pred_answer})
-    output.to_csv("./output/submission.csv")
+    output = pd.DataFrame({"id": test_id, "target": pred_answer})
+    output.to_csv("./output/submission.csv", index=False)
     print("---- FINISH ----")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--project_name', type=str, default="baseline")
+    parser.add_argument('--base_model', type=str, default="klue/bert-base")
+    parser.add_argument('--data_path', type=str, default='./dataset/test.csv')
+    
+    args = parser.parse_args()
+    main(args)
