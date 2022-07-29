@@ -37,8 +37,10 @@ def main(args):
     print(f"Current device is {device}")
 
     set_seed(training_args.seed)
-
+    total_dataset = pd.read_csv(data_path)
     tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
+
+    # Non K-Fold Process
     model_config = AutoConfig.from_pretrained(pretrained_model_name_or_path=model_name)
     model_config.num_labels = 6
     model = AutoModelForSequenceClassification.from_pretrained(
@@ -48,7 +50,6 @@ def main(args):
     model.to(device)
     model.train()
 
-    print(training_args.device)
     wandb.init(
         entity="psrpsj",
         project="shoppingmall",
@@ -58,7 +59,6 @@ def main(args):
 
     wandb.config.update(training_args)
 
-    total_dataset = pd.read_csv(data_path)
     train_dataset, valid_dataset = train_test_split(
         total_dataset, test_size=0.2, stratify=total_dataset["target"], random_state=42
     )
@@ -81,9 +81,10 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, default="klue/bert-base")
-    parser.add_argument('--project_name', type=str, default='baseline')
-    parser.add_argument('--data_path', type=str, default='./dataset/train.csv')
-    
+    parser.add_argument("--model_name", type=str, default="klue/bert-base")
+    parser.add_argument("--project_name", type=str, default="baseline")
+    parser.add_argument("--data_path", type=str, default="./dataset/train.csv")
+    parser.add_argument("--k_fold", type=bool, default=False)
+
     args = parser.parse_args()
     main(args)
