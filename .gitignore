@@ -1,5 +1,6 @@
 test.ipynb
 .DS_Store
 output/
+dataset/
 __pycache__/
 wandb/
