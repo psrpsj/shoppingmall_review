@@ -1,3 +1,5 @@
 test.ipynb
 .DS_Store
 output/
+__pycache__/
+wandb/

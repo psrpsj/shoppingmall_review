@@ -23,7 +23,7 @@ def compute_metrics(pred):
     probs = pred.predictions
 
     acc = accuracy_score(labels, preds)
-    return {"accuracy" : acc}
+    return {"accuracy": acc}
 
 
 def main():
@@ -60,8 +60,8 @@ def main():
     train_dataset, valid_dataset = train_test_split(
         total_dataset, test_size=0.2, stratify=total_dataset["target"], random_state=42
     )
-    train = CustomDataset(train_dataset, tokenizer)
-    valid = CustomDataset(valid_dataset, tokenizer)
+    train = CustomDataset(train_dataset, train_dataset["target"].tolist(), tokenizer)
+    valid = CustomDataset(valid_dataset, valid_dataset["target"].tolist(), tokenizer)
 
     trainer = Trainer(
         model=model,
