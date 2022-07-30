@@ -16,4 +16,4 @@ class TrainingArguments(TrainingArguments):
     evaluation_strategy: str = field(default = "steps")
     save_strategy: str = field(default="steps")
     metric_for_best_model: str = field(default="accuracy")
-    full_determinism: bool = field(default=False)
+    save_total_limit: int = field(default=1)
