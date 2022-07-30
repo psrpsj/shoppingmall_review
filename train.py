@@ -1,11 +1,12 @@
 import argparse
+import os
 import pandas as pd
 import torch
 import wandb
 
 from arguments import TrainingArguments
 from dataset import CustomDataset
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score
 from transformers import (
     AutoConfig,
@@ -30,60 +31,128 @@ def main(args):
     model_name = args.model_name
     data_path = args.data_path
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    parser = HfArgumentParser(TrainingArguments)
-    (training_args,) = parser.parse_args_into_dataclasses()
 
     print(f"Current Model is {model_name}")
     print(f"Current device is {device}")
 
+    parser = HfArgumentParser(TrainingArguments)
+    (training_args,) = parser.parse_args_into_dataclasses()
+    total_dataset = pd.read_csv(data_path)
+    total_label = total_dataset["target"]
+    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
     set_seed(training_args.seed)
 
-    tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path=model_name)
-    model_config = AutoConfig.from_pretrained(pretrained_model_name_or_path=model_name)
-    model_config.num_labels = 6
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_name, config=model_config
-    )
-    model.resize_token_embeddings(len(tokenizer))
-    model.to(device)
-    model.train()
+    # K-Fold Process
+    if args.k_fold:
+        print("---- STARTING K-FOLD ----")
+        fold_num = 1
+        k_fold = StratifiedKFold(n_splits=5, shuffle=False)
+        for train_index, valid_index in k_fold.split(total_dataset, total_label):
+            wandb.init(
+                entity="psrpsj",
+                project="shoppingmall",
+                name=args.project_name + "_kfold_" + str(fold_num),
+                tags=args.model_name,
+            )
+            wandb.config.update(training_args)
 
-    print(training_args.device)
-    wandb.init(
-        entity="psrpsj",
-        project="shoppingmall",
-        name=args.project_name,
-        tags=model_name,
-    )
+            print(f"---- Fold Number {fold_num} start ----")
+            output_dir = os.path.join(
+                training_args.output_dir,
+                args.project_name + "_kfold",
+                "fold" + str(fold_num),
+            )
 
-    wandb.config.update(training_args)
+            train_dataset, valid_dataset = (
+                total_dataset.iloc[train_index],
+                total_dataset.iloc[valid_index],
+            )
 
-    total_dataset = pd.read_csv(data_path)
-    train_dataset, valid_dataset = train_test_split(
-        total_dataset, test_size=0.2, stratify=total_dataset["target"], random_state=42
-    )
-    train = CustomDataset(train_dataset, train_dataset["target"].tolist(), tokenizer)
-    valid = CustomDataset(valid_dataset, valid_dataset["target"].tolist(), tokenizer)
+            train_label, valid_label = (
+                total_label.iloc[train_index],
+                total_label.iloc[valid_index],
+            )
 
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train,
-        eval_dataset=valid,
-        compute_metrics=compute_metrics,
-    )
+            train = CustomDataset(train_dataset, train_label.tolist(), tokenizer)
+            valid = CustomDataset(valid_dataset, valid_label.tolist(), tokenizer)
 
-    print("---- START TRAINING ----")
-    trainer.train()
-    model.save_pretrained(training_args.output_dir + args.project_name)
+            model_config = AutoConfig.from_pretrained(
+                pretrained_model_name_or_path=args.model_name
+            )
+            model_config.num_labels = 6
+            model = AutoModelForSequenceClassification.from_pretrained(
+                args.model_name, config=model_config
+            )
+            model.resize_token_embeddings(len(tokenizer))
+            model.to(device)
+            model.train()
+
+            trainer = Trainer(
+                model=model,
+                args=training_args,
+                train_dataset=train,
+                eval_dataset=valid,
+                compute_metrics=compute_metrics,
+            )
+            trainer.train()
+            model.save_pretrained(output_dir)
+            wandb.finish()
+            fold_num += 1
+
+    # Non K-Fold Process
+    else:
+        model_config = AutoConfig.from_pretrained(
+            pretrained_model_name_or_path=args.model_name
+        )
+        model_config.num_labels = 6
+        model = AutoModelForSequenceClassification.from_pretrained(
+            args.model_name, config=model_config
+        )
+        model.resize_token_embeddings(len(tokenizer))
+        model.to(device)
+        model.train()
+
+        wandb.init(
+            entity="psrpsj",
+            project="shoppingmall",
+            name=args.project_name,
+            tags=args.model_name,
+        )
+
+        wandb.config.update(training_args)
+
+        train_dataset, valid_dataset = train_test_split(
+            total_dataset, test_size=0.2, stratify=total_label, random_state=42
+        )
+        train = CustomDataset(
+            train_dataset, train_dataset["target"].tolist(), tokenizer
+        )
+        valid = CustomDataset(
+            valid_dataset, valid_dataset["target"].tolist(), tokenizer
+        )
+
+        trainer = Trainer(
+            model=model,
+            args=training_args,
+            train_dataset=train,
+            eval_dataset=valid,
+            compute_metrics=compute_metrics,
+        )
+
+        print("---- START TRAINING ----")
+        trainer.train()
+        model.save_pretrained(training_args.output_dir + args.project_name)
+        wandb.finish()
+
     print("---- FINISH ----")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, default="klue/bert-base")
-    parser.add_argument('--project_name', type=str, default='baseline')
-    parser.add_argument('--data_path', type=str, default='./dataset/train.csv')
-    
+    parser.add_argument("--model_name", type=str, default="klue/bert-base")
+    parser.add_argument("--project_name", type=str, default="baseline")
+    parser.add_argument("--data_path", type=str, default="./dataset/train.csv")
+    parser.add_argument("--k_fold", type=bool, default=True)
+
     args = parser.parse_args()
     main(args)
