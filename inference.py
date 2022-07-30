@@ -55,7 +55,7 @@ def main(args):
 
         output = pd.DataFrame({"id": test_id, "target": pred_answer})
         output.to_csv(
-            os.path.join("./output", args.project_name + "_kfold", "submission.csv")
+            os.path.join("./output", args.project_name + "_kfold", "submission.csv"), index=False
         )
 
     else:
