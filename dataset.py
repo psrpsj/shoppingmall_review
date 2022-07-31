@@ -22,4 +22,4 @@ class CustomDataset(Dataset):
         return encoded
 
     def __len__(self):
-        return len(self.dataset)
+        return len(self.label)
