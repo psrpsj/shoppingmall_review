@@ -5,6 +5,7 @@ import wandb
 
 from arguments import TrainModelArgument, TrainingArguments
 from dataset import CustomDataset
+from preprocess import preprocess
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import accuracy_score
 from transformers import (
@@ -42,7 +43,8 @@ def main():
     print(f"Current Model is {model_args.model_name}")
     print(f"Current device is {device}")
 
-    total_dataset = pd.read_csv(model_args.data_path)
+    total_dataset = preprocess(model_args.data_path, "train.csv")
+    total_review = total_dataset["reviews"]
     total_label = total_dataset["target"]
     tokenizer = AutoTokenizer.from_pretrained(
         pretrained_model_name_or_path=model_args.model_name
@@ -70,9 +72,9 @@ def main():
                 "fold" + str(fold_num),
             )
 
-            train_dataset, valid_dataset = (
-                total_dataset.iloc[train_index],
-                total_dataset.iloc[valid_index],
+            train_review, valid_review = (
+                total_review.iloc[train_index],
+                total_review.iloc[valid_index],
             )
 
             train_label, valid_label = (
@@ -80,8 +82,8 @@ def main():
                 total_label.iloc[valid_index],
             )
 
-            train = CustomDataset(train_dataset, train_label.tolist(), tokenizer)
-            valid = CustomDataset(valid_dataset, valid_label.tolist(), tokenizer)
+            train = CustomDataset(train_review, train_label, tokenizer)
+            valid = CustomDataset(valid_review, valid_label, tokenizer)
 
             model_config = AutoConfig.from_pretrained(
                 pretrained_model_name_or_path=model_args.model_name
@@ -132,10 +134,10 @@ def main():
             total_dataset, test_size=0.2, stratify=total_label, random_state=42
         )
         train = CustomDataset(
-            train_dataset, train_dataset["target"].tolist(), tokenizer
+            train_dataset["reviews"], train_dataset["target"], tokenizer
         )
         valid = CustomDataset(
-            valid_dataset, valid_dataset["target"].tolist(), tokenizer
+            valid_dataset["reviews"], valid_dataset["target"], tokenizer
         )
 
         trainer = Trainer(

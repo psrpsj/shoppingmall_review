@@ -3,11 +3,10 @@ import torch
 
 
 class CustomDataset(Dataset):
-    def __init__(self, dataset, label, tokenizer):
-        self.dataset = dataset
-        self.label = label
+    def __init__(self, reviews, label, tokenizer):
+        self.label = label.tolist()
         self.tokenized_sentence = tokenizer(
-            dataset["reviews"].tolist(),
+            reviews.tolist(),
             return_tensors="pt",
             padding=True,
             truncation=True,

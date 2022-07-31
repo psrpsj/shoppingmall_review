@@ -30,7 +30,7 @@ class TrainingArguments(TrainingArguments):
 class TrainModelArgument:
     model_name: str = field(default="klue/bert-base")
     project_name: str = field(default="baseline")
-    data_path: str = field(default="./dataset/train.csv")
+    data_path: str = field(default="./dataset/")
     k_fold: bool = field(default=False)
 
 
