@@ -27,8 +27,16 @@ def compute_metrics(pred):
 
 
 def main():
-    parser = HfArgumentParser(TrainingArguments, TrainModelArgument)
-    (training_args, model_args) = parser.parse_args_into_dataclasses()
+    parser = HfArgumentParser(
+        (
+            TrainingArguments,
+            TrainModelArgument,
+        )
+    )
+    (
+        training_args,
+        model_args,
+    ) = parser.parse_args_into_dataclasses()
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     print(f"Current Model is {model_args.model_name}")
