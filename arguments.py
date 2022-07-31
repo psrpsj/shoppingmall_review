@@ -17,6 +17,13 @@ class TrainingArguments(TrainingArguments):
     save_strategy: str = field(default="steps")
     metric_for_best_model: str = field(default="accuracy")
     save_total_limit: int = field(default=1)
+    lr_scheduler_type: str = field(
+        default="cosine_with_restarts",
+        metadata={
+            "help": "Select evaluation strategy[linear, cosine, cosine_with_restarts, polynomial, constant, constant with warmup]"
+        },
+    )
+    warmup_steps: int = field(default=500)
 
 
 @dataclass
