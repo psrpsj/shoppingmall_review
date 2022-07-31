@@ -4,3 +4,4 @@ output/
 dataset/
 __pycache__/
 wandb/
+data_eda.ipynb
