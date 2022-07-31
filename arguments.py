@@ -38,5 +38,5 @@ class TrainModelArgument:
 class InferenceArgument:
     project_name: str = field(default="baseline")
     base_model: str = field(default="klue/bert-base")
-    data_path: str = field(default="./dataset/test.csv")
+    data_path: str = field(default="./dataset/")
     k_fold: bool = field(default=False)

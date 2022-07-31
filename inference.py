@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 from arguments import InferenceArgument
 from dataset import CustomDataset
+from preprocess import preprocess
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 from transformers import (
@@ -22,7 +23,7 @@ def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     tokenizer = AutoTokenizer.from_pretrained(inference_args.base_model)
 
-    dataset = pd.read_csv(data_path)
+    dataset = preprocess(data_path, "test.csv")
     dataset["label"] = [100] * len(dataset)
     test_id = dataset["id"]
     test_dataset = CustomDataset(dataset, dataset["label"], tokenizer)
