@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 
 def preprocess(data_path, file_name):
-    if os.path.exists(os.path.join(data_path, file_name + "_fix")):
+    if os.path.exists(os.path.join(data_path, file_name + "_fix.csv")):
         print("Preprocess file already exist!")
-        return pd.read_csv(os.path.join(data_path, file_name + "_fix"))
+        return pd.read_csv(os.path.join(data_path, file_name + "_fix.csv"))
 
     else:
         before = pd.read_csv(os.path.join(data_path, file_name))
@@ -33,5 +33,6 @@ def preprocess(data_path, file_name):
                 "target": after_target,
             }
         )
+        after.to_csv(os.path.join(data_path, file_name + "_fix.csv"), index=False)
         print("---- FINISH PREPROCESSING ----")
         return after
