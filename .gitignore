@@ -1,7 +1,8 @@
 test.ipynb
+data_eda.ipynb
 .DS_Store
 output/
 dataset/
 __pycache__/
 wandb/
-data_eda.ipynb
+
