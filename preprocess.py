@@ -22,11 +22,10 @@ def preprocess(data_path, file_name):
             pattern_check = pattern.sub("", review)
             spell_checked = spell_checker.check(pattern_check)
 
-            if len(spell_checked) != 0:
-                after_id.append(before["reviews"].iloc[idx])
-                after_review.append(spell_checked.checked)
-                if "train" in file_name:
-                  after_target.append(before["target"].iloc[idx])
+            after_id.append(before["id"].iloc[idx])
+            after_review.append(spell_checked.checked)
+            if "train" in file_name:
+              after_target.append(before["target"].iloc[idx])
 
         after = pd.DataFrame()
         if "train" in file_name:
