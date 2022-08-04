@@ -10,7 +10,7 @@ class CustomDataset(Dataset):
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=256,
+            max_length=128,
         )
 
     def __getitem__(self, idx):

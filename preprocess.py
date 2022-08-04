@@ -9,26 +9,7 @@ from tqdm import tqdm
 
 def preprocess(data_path, file_name):
     file_name = file_name.replace(".csv", "")
-    stopwords = [
-        "의",
-        "가",
-        "이",
-        "은",
-        "들",
-        "는",
-        "좀",
-        "잘",
-        "걍",
-        "과",
-        "도",
-        "를",
-        "으로",
-        "자",
-        "에",
-        "와",
-        "한",
-        "하다",
-    ]
+
     if os.path.exists(os.path.join(data_path, file_name + "_fix.csv")):
         print("Preprocess file already exist!")
         return pd.read_csv(os.path.join(data_path, file_name + "_fix.csv"))
@@ -36,6 +17,14 @@ def preprocess(data_path, file_name):
     else:
         before = pd.read_csv(os.path.join(data_path, file_name + ".csv"))
         after_id, after_review, after_target = [], [], []
+
+        f = open("./dataset/stopword.txt", encoding="UTF-8")
+        line = f.readlines()
+        stopwords = []
+        for l in line:
+            l = l.replace("\n", "")
+            stopwords.append(l)
+
         print("---- START PREPROCESSING ----")
         for idx in tqdm(range(len(before))):
 
