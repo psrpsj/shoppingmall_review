@@ -41,7 +41,7 @@ def preprocess(data_path, file_name):
 
             # Regex
             review = before["reviews"].iloc[idx]
-            pattern = re.compile("[^ 가-힣0-9+]")
+            pattern = re.compile("[^ 가-힣0-9a-zA-Z+]")
             pattern_check = pattern.sub("", review)
 
             # Stopwords
@@ -49,6 +49,8 @@ def preprocess(data_path, file_name):
             s_morphs = okt.morphs(pattern_check)
             s_checked = [w for w in s_morphs if w not in stopwords]
             s_checked = " ".join(s_checked)
+            if "train" in file_name and len(s_checked) == 0:
+                continue
 
             # grammer check
             spell_checked = spell_checker.check(s_checked)
