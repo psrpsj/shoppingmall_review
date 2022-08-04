@@ -40,6 +40,8 @@ def preprocess(data_path, file_name):
             s_checked = " ".join(s_checked)
             if "train" in file_name and len(s_checked) == 0:
                 continue
+            elif "test" in file_name and len(s_checked) == 0:
+                s_checked = review
 
             # grammer check
             spell_checked = spell_checker.check(s_checked)
