@@ -43,7 +43,7 @@ def main():
     print(f"Current Model is {model_args.model_name}")
     print(f"Current device is {device}")
 
-    total_dataset = preprocess(model_args.data_path, "train.csv")
+    total_dataset = preprocess(model_args.data_path, train=True)
     total_review = total_dataset["reviews"]
     total_label = total_dataset["target"]
     tokenizer = AutoTokenizer.from_pretrained(

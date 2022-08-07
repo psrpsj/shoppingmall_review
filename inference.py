@@ -23,7 +23,7 @@ def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     tokenizer = AutoTokenizer.from_pretrained(inference_args.base_model)
 
-    dataset = preprocess(data_path, "test.csv")
+    dataset = preprocess(data_path, train=False)
     dataset["label"] = [100] * len(dataset)
     test_id = dataset["id"]
     test_dataset = CustomDataset(dataset["reviews"], dataset["label"], tokenizer)
@@ -98,7 +98,10 @@ def main():
         pred_answer = np.concatenate(output_pred).tolist()
         output_prob = np.concatenate(output_prob, axis=0).tolist()
         output = pd.DataFrame({"id": test_id, "target": pred_answer})
-        output.to_csv(os.path.join("./output", inference_args.project_name, "submission.csv"), index=False)
+        output.to_csv(
+            os.path.join("./output", inference_args.project_name, "submission.csv"),
+            index=False,
+        )
     print("---- FINISH ----")
 
 

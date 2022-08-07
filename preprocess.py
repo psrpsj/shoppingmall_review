@@ -7,21 +7,26 @@ from konlpy.tag import Okt
 from tqdm import tqdm
 
 
-def preprocess(data_path, file_name):
-    file_name = file_name.replace(".csv", "")
+def preprocess(data_path, train=True):
+    file_result = "test_fix.csv"
+    file_process = "test.csv"
+    if train:
+        file_result = "train_fix.csv"
+        file_process = "train.csv"
 
-    if os.path.exists(os.path.join(data_path, file_name + "_fix.csv")):
+    if os.path.exists(os.path.join(data_path, file_result)):
         print("Preprocess file already exist!")
-        return pd.read_csv(os.path.join(data_path, file_name + "_fix.csv"))
-
+        return pd.read_csv(os.path.join(data_path, file_result))
     else:
-        before = pd.read_csv(os.path.join(data_path, file_name + ".csv"))
+        before = pd.read_csv(os.path.join(data_path, file_process))
         after_id, after_review, after_target = [], [], []
 
-        f = open("./dataset/stopword.txt", encoding="UTF-8")
+        # Preparing Stopword
+        f = open(os.path.join(data_path, "stopword.txt"), encoding="UTF-8")
         line = f.readlines()
         stopwords = []
         for l in line:
+            # 개행문자 제거
             l = l.replace("\n", "")
             stopwords.append(l)
 
@@ -33,26 +38,25 @@ def preprocess(data_path, file_name):
             pattern = re.compile("[^ 가-힣0-9a-zA-Z+]")
             pattern_check = pattern.sub("", review)
 
-            # Stopwords
+            # Stopword
             okt = Okt()
             s_morphs = okt.morphs(pattern_check)
             s_checked = [w for w in s_morphs if w not in stopwords]
             s_checked = " ".join(s_checked)
-            if "train" in file_name and len(s_checked) == 0:
-                continue
-            elif "test" in file_name and len(s_checked) == 0:
-                s_checked = review
+            if not train and len(s_checked) == 0:
+                s_checked = pattern_check
 
             # grammer check
             spell_checked = spell_checker.check(s_checked)
 
+            # Append result
             after_id.append(before["id"].iloc[idx])
             after_review.append(spell_checked.checked)
-            if "train" in file_name:
+            if train:
                 after_target.append(before["target"].iloc[idx])
 
         after = pd.DataFrame()
-        if "train" in file_name:
+        if train:
             after = pd.DataFrame(
                 {
                     "id": after_id,
@@ -67,6 +71,7 @@ def preprocess(data_path, file_name):
                     "reviews": after_review,
                 }
             )
-        after.to_csv(os.path.join(data_path, file_name + "_fix.csv"), index=False)
+
+        after.to_csv(os.path.join(data_path, file_result), index=False)
         print("---- FINISH PREPROCESSING ----")
         return after
