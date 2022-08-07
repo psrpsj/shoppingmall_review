@@ -24,7 +24,7 @@
 ## 3. Detail 
   - Preprocess 
     - 정규표현식을 이용한 특수문자 제거.
-    - [Open Korean Text Processor](https://github.com/open-korean-text/open-korean-text) 를 이용한 Stopword(출처: https://www.ranks.nl/stopwords/korean)제거.
+    - [Open Korean Text Processor](https://github.com/open-korean-text/open-korean-text) 를 이용한 Stopword(출처: https://www.ranks.nl/stopwords/korean) 제거.
     - [hanspell](https://github.com/ssut/py-hanspell)을 이용한 맞춤법 교정.
   - Model
     - 전처리 된 데이터를 klue/bert-base에 fine-tunning 과정을 거침.
