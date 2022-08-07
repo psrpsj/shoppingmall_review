@@ -2,7 +2,8 @@ test.ipynb
 data_eda.ipynb
 .DS_Store
 output/
-dataset/
+dataset/test.csv
+dataset/train.csv
 __pycache__/
 wandb/
 
