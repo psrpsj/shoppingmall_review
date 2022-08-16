@@ -33,5 +33,5 @@
   - Inference
     - 각 Fold model의 inference 과정을 거친후 나온 softmax 확률을 soft-voting 과정을 거쳐 최종추론 함.
   - 최종성적
-    - Public Score: 0.6972
-    - Private Score: TBD
+    - Public Score: 0.6972 (22th/549)
+    - Private Score: 0.69968(24th/549)
