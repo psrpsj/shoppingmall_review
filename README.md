@@ -28,7 +28,7 @@
     - [py-hanspell](https://github.com/ssut/py-hanspell)을 이용한 맞춤법 교정.
   - Model
     - 전처리 된 데이터를 klue/bert-base에 fine-tunning 과정을 거침.
-    - K-Fold(5 Fold)의 교차 검증과증을 통해 보다 정교한 모델 제작(Public Accuracy 기준 0.02 상승)
+    - K-Fold(5 Fold)의 교차 검증과정을 통해 보다 정교한 모델 제작(Public Accuracy 기준 0.02 상승)
     - Batch size: 16 / Epoch : 5
   - Inference
     - 각 Fold model의 inference 과정을 거친후 나온 softmax 확률을 soft-voting 과정을 거쳐 최종추론 함.
