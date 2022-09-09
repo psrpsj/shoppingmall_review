@@ -28,6 +28,7 @@ class TrainingArguments(TrainingArguments):
 @dataclass
 class TrainModelArgument:
     model_name: str = field(default="klue/bert-base")
+    loss_name: str = field(default="focal")
     project_name: str = field(default="baseline")
     data_path: str = field(default="./dataset/")
     k_fold: bool = field(default=False)

@@ -16,6 +16,7 @@ from transformers import (
     Trainer,
     set_seed,
 )
+from trainer import CustomTrainer
 
 
 def compute_metrics(pred):
@@ -96,7 +97,8 @@ def main():
             model.to(device)
             model.train()
 
-            trainer = Trainer(
+            trainer = CustomTrainer(
+                loss_name=model_args.loss_name,
                 model=model,
                 args=training_args,
                 train_dataset=train,
@@ -140,7 +142,8 @@ def main():
             valid_dataset["reviews"], valid_dataset["target"], tokenizer
         )
 
-        trainer = Trainer(
+        trainer = CustomTrainer(
+            loss_name=model_args.loss_name,
             model=model,
             args=training_args,
             train_dataset=train,
