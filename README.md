@@ -17,8 +17,10 @@
 ├── argument.py
 ├── dataset.py
 ├── inference.py
+├── loss.py
 ├── preprocess.py
-└── train.py
+├── train.py
+└── trainer.py
 ```
 
 ## 3. Detail 
