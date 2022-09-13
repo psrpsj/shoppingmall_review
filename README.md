@@ -1,4 +1,5 @@
 # Shoppingmall_Review
+[Report](https://sangryu-notes.notion.site/b41c456530814625b00ba0575ab2dcdf)
 ## 1. Project Overview
   - 목표
     - 상품 리뷰 텍스트로 상품의 평점을 예측.
